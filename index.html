@@ -1,0 +1,803 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta property="og:title" content="Ваш бизнес теряет деньги каждый месяц">
+<meta property="og:description" content="Бесплатный расчёт потерь за 3 минуты. Аудит и ИИ-автоматизация для малого бизнеса.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="pavel.webp">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Павел Барков — ИИ для бизнеса</title>
+<meta name="description" content="Найду, где ваш бизнес теряет деньги, и закрою эти дыры с помощью ИИ. Расчёт потерь, ИИ-администратор, возврат клиентов, аудит звонков.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: тёмный герой с кассовым «чеком потерь» как главным объектом; ниже светлая лента разделов,
+   цифры всегда моноширинным шрифтом — как в бухгалтерии */
+:root {
+  --bg: #f2f4f7;
+  --surface: #ffffff;
+  --ink: #111a28;
+  --muted: #5b6778;
+  --line: #dbe1e8;
+  --accent: #2f55ff;
+  --accent-soft: #e5ebff;
+  --on-accent: #ffffff;
+  --loss: #c8352b;
+  --gain: #17845a;
+  /* тёмные полосы (герой, финал) — одинаковы в обеих темах */
+  --night: #0d1524;
+  --night-2: #16213a;
+  --night-ink: #eef2f8;
+  --night-muted: #9aa7bd;
+  --night-line: #26324b;
+  --paper: #fbfaf6;
+  --paper-ink: #1a2230;
+  --paper-muted: #7a8291;
+  --paper-line: #d8d5cb;
+  --f-display: "Unbounded", "Manrope", system-ui, sans-serif;
+  --f-body: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b111c; --surface: #141d2c; --ink: #e9eef6; --muted: #97a4b8; --line: #243046;
+    --accent: #7d97ff; --accent-soft: #1b2645; --on-accent: #0b111c; --loss: #ff8b80; --gain: #5fd6a4;
+    --night: #070c16; --night-2: #111a2c; --night-line: #222e46;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0b111c; --surface: #141d2c; --ink: #e9eef6; --muted: #97a4b8; --line: #243046;
+  --accent: #7d97ff; --accent-soft: #1b2645; --on-accent: #0b111c; --loss: #ff8b80; --gain: #5fd6a4;
+  --night: #070c16; --night-2: #111a2c; --night-line: #222e46;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before { animation: none !important; transition: none !important; } }
+body { background: var(--bg); color: var(--ink); font: 400 17px/1.6 var(--f-body); -webkit-font-smoothing: antialiased; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--night); }
+.wrap {
+  max-width: 1160px; margin: 0 auto;
+  padding-left: max(20px, env(safe-area-inset-left, 0px));
+  padding-right: max(20px, env(safe-area-inset-right, 0px));
+}
+a { color: var(--accent); }
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+p { margin: 0; }
+h2 { font: 600 clamp(28px, 4.2vw, 44px)/1.1 var(--f-display); letter-spacing: -0.02em; }
+h3 { font: 700 19px/1.3 var(--f-body); }
+.eyebrow { font: 600 12px/1 var(--f-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+.mono { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 16px 24px; border-radius: 999px;
+  font: 700 16px/1 var(--f-body); text-decoration: none; border: 0; cursor: pointer; transition: transform .18s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease; }
+.btn svg { width: 18px; height: 18px; flex: 0 0 auto; }
+.btn-primary { background: var(--accent); color: var(--on-accent); box-shadow: 0 10px 30px -12px var(--accent); }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 16px 34px -12px var(--accent); }
+.btn-line { color: var(--night-ink); background: transparent; border: 1.5px solid var(--night-line); }
+.btn-line:hover { border-color: var(--night-ink); }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+/* ===== Тёмный герой ===== */
+.night { background: var(--night); color: var(--night-ink); position: relative; overflow: hidden; }
+.night::before { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background-image: radial-gradient(circle at 1px 1px, var(--night-line) 1px, transparent 1.4px);
+  background-size: 26px 26px; mask-image: linear-gradient(180deg, #000 0%, transparent 85%); -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 85%); }
+.night::after { content: ""; position: absolute; width: 720px; height: 720px; right: -180px; top: -260px; pointer-events: none;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 38%, transparent), transparent); opacity: .55; }
+.night > * { position: relative; z-index: 1; }
+
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: color-mix(in srgb, var(--night) 82%, transparent);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--night-line); color: var(--night-ink); }
+.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 14px; }
+.brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; }
+.mark { width: 38px; height: 38px; border-radius: 10px; background: var(--accent); color: var(--on-accent); display: grid; place-items: center;
+  font: 800 14px/1 var(--f-display); letter-spacing: .02em; }
+.brand b { display: block; font: 600 15px/1.2 var(--f-display); }
+.brand span { display: block; font-size: 12.5px; color: var(--night-muted); }
+.brand .mark { display: grid; font: 800 14px/1 var(--f-display); color: var(--on-accent); }
+.top nav { display: flex; gap: 26px; font-size: 15px; font-weight: 500; }
+.top nav a { color: var(--night-muted); text-decoration: none; }
+.top nav a:hover { color: var(--night-ink); }
+.top .btn { padding: 11px 18px; font-size: 14px; }
+
+.hero { display: grid; grid-template-columns: 1.1fr .9fr; gap: 64px; align-items: center; padding-block: 64px 96px; }
+.hero > * { min-width: 0; }
+.hero .eyebrow { color: color-mix(in srgb, var(--accent) 70%, #fff); }
+.hero h1 { font: 800 clamp(34px, 5.6vw, 66px)/1.02 var(--f-display); letter-spacing: -0.035em; margin-top: 20px; }
+.hero h1 .hl { color: var(--loss); position: relative; white-space: nowrap; }
+.hero h1 .hl::after { content: ""; position: absolute; left: 0; right: 0; bottom: .04em; height: .09em; background: currentColor; opacity: .35; border-radius: 2px; }
+.hero .lead { font-size: 19px; color: var(--night-muted); margin-top: 24px; max-width: 32em; }
+.hero .cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
+.hero .note { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 20px; font-size: 14px; color: var(--night-muted); }
+.hero .note span::before { content: "✓ "; color: var(--gain); font-weight: 700; }
+
+/* Переключатель ниш */
+.niches { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 30px; }
+.niches-label { width: 100%; font: 600 11.5px/1 var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--night-muted); margin-bottom: 4px; }
+.chip { font: 600 14px/1 var(--f-body); padding: 10px 15px; border-radius: 999px; border: 1.5px solid var(--night-line); background: transparent; color: var(--night-muted); cursor: pointer; transition: all .18s ease; }
+.chip:hover { color: var(--night-ink); border-color: var(--night-muted); }
+.chip[aria-pressed="true"] { background: var(--night-ink); color: var(--night); border-color: var(--night-ink); }
+
+/* Чек потерь */
+.receipt-wrap { position: relative; justify-self: center; width: 100%; max-width: 430px; }
+.receipt-wrap::before { content: ""; position: absolute; left: 10%; right: 10%; top: -14px; height: 14px; border-radius: 8px 8px 0 0;
+  background: linear-gradient(var(--night-2), #000); box-shadow: inset 0 -3px 0 #000; }
+.receipt { background: var(--paper); color: var(--paper-ink); font: 400 14px/1.45 var(--f-mono); padding: 22px 22px 32px;
+  transform: rotate(1.2deg); box-shadow: 0 40px 70px -30px #000, 0 2px 0 var(--paper-line) inset;
+  -webkit-mask: linear-gradient(#000 0 0) top/100% calc(100% - 10px) no-repeat, conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom/16px 10px repeat-x;
+  mask: linear-gradient(#000 0 0) top/100% calc(100% - 10px) no-repeat, conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom/16px 10px repeat-x; }
+.receipt.printing { animation: print .7s cubic-bezier(.2,.8,.2,1); }
+@keyframes print { from { clip-path: inset(0 0 100% 0); transform: rotate(1.2deg) translateY(-18px); } to { clip-path: inset(0 0 0 0); transform: rotate(1.2deg); } }
+.r-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; padding-bottom: 12px; border-bottom: 1.5px dashed var(--paper-line); }
+.r-head b { font-weight: 600; font-size: 13px; letter-spacing: .14em; }
+.r-head span { font-size: 11.5px; color: var(--paper-muted); }
+.r-top { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding-block: 16px; }
+.r-top > div { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.r-top small { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--paper-muted); }
+.r-top b { font: 700 clamp(22px, 2.4vw, 28px)/1.05 var(--f-display); letter-spacing: -.03em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.r-lose b { color: var(--loss); }
+.r-win { background: color-mix(in srgb, var(--gain) 12%, var(--paper)); border: 1.5px solid color-mix(in srgb, var(--gain) 45%, transparent); border-radius: 10px; padding: 10px 12px; }
+.r-win b { color: var(--gain); }
+.r-win span { font-size: 11px; color: var(--gain); }
+.r-rows { display: flex; flex-direction: column; gap: 10px; padding-top: 14px; border-top: 1.5px dashed var(--paper-line); }
+.r-row { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; align-items: baseline; }
+.r-row .k { font-size: 13.5px; min-width: 0; }
+.r-row .v { font-weight: 600; color: var(--loss); font-variant-numeric: tabular-nums; font-size: 13.5px; }
+.r-row .bar { grid-column: 1 / -1; height: 4px; border-radius: 2px; background: color-mix(in srgb, var(--paper-line) 60%, transparent); overflow: hidden; }
+.r-row .bar i { display: block; height: 100%; background: var(--loss); opacity: .75; border-radius: 2px; }
+.r-row .h { grid-column: 1 / -1; font-size: 11px; color: var(--paper-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.r-cta { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 18px; padding: 13px 16px; border-radius: 10px;
+  background: var(--paper-ink); color: var(--paper); text-decoration: none; font: 700 14px/1 var(--f-body); transition: transform .15s ease; }
+.r-cta:hover { transform: translateY(-1px); }
+.r-foot { text-align: center; margin-top: 10px; font-size: 11px; color: var(--paper-muted); }
+
+/* Полоса фактов */
+.facts-strip { border-top: 1px solid var(--night-line); }
+.facts-strip .wrap { display: grid; grid-template-columns: repeat(4, 1fr); }
+.fs { padding-block: 26px; padding-right: 20px; display: flex; flex-direction: column; gap: 6px; }
+.fs + .fs { border-left: 1px solid var(--night-line); padding-left: 24px; }
+.fs b { font: 600 26px/1 var(--f-display); letter-spacing: -.02em; }
+.fs span { font-size: 14px; color: var(--night-muted); }
+
+/* ===== Светлые разделы ===== */
+section.block { padding-block: 96px; }
+section.block + section.block { border-top: 1px solid var(--line); }
+.sec-head { display: grid; grid-template-columns: 300px 1fr; gap: 48px; margin-bottom: 48px; }
+.sec-head > * { min-width: 0; }
+.sec-head p { color: var(--muted); max-width: 40em; margin-top: 16px; font-size: 18px; }
+
+.leaks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.leak { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 30px; display: flex; flex-direction: column; gap: 12px; transition: transform .2s ease, box-shadow .2s ease; }
+.leak:hover { transform: translateY(-4px); box-shadow: 0 24px 40px -28px color-mix(in srgb, var(--ink) 60%, transparent); }
+.leak .fig { font: 600 30px/1 var(--f-display); color: var(--loss); letter-spacing: -.02em; }
+.leak .fig small { display: block; font: 500 13px/1.4 var(--f-mono); color: var(--muted); letter-spacing: 0; margin-top: 8px; }
+.leak p { color: var(--muted); font-size: 16px; }
+
+/* Услуги */
+.pay-note { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.pay-note span { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); font-size: 14px; font-weight: 600; }
+.pay-note span::before { content: "✓"; color: var(--gain); font-weight: 700; }
+.svc-main { display: grid; grid-template-columns: 1.25fr 1fr 1fr; gap: 20px; }
+.svc-card { border-radius: 22px; padding: 32px; display: flex; flex-direction: column; gap: 14px; background: var(--surface); border: 1px solid var(--line); }
+.svc-card .price { font: 600 15px/1 var(--f-mono); color: var(--muted); }
+.svc-card .price b { font: 600 28px/1 var(--f-display); color: var(--ink); letter-spacing: -.02em; }
+.svc-card p { color: var(--muted); font-size: 16px; }
+.svc-card ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 15px; }
+.svc-card li { display: flex; gap: 10px; }
+.svc-card li::before { content: ""; flex: 0 0 auto; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-top: 9px; }
+.svc-card .btn { margin-top: auto; align-self: flex-start; }
+.svc-card.free { background: var(--accent); color: var(--on-accent); border-color: transparent; }
+.svc-card.free .price, .svc-card.free p, .svc-card.free li { color: color-mix(in srgb, var(--on-accent) 82%, var(--accent)); }
+.svc-card.free .price b { color: var(--on-accent); }
+.svc-card.free li::before { background: var(--on-accent); }
+.svc-card.free .btn { background: var(--on-accent); color: var(--accent); box-shadow: none; }
+.tag { display: inline-block; align-self: flex-start; font: 600 11.5px/1 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; padding: 7px 10px; border-radius: 6px; background: var(--accent-soft); color: var(--accent); }
+.svc-card.free .tag { background: color-mix(in srgb, var(--on-accent) 18%, transparent); color: var(--on-accent); }
+
+.more { margin-top: 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 22px; }
+.more summary { list-style: none; cursor: pointer; padding: 24px 32px; display: flex; justify-content: space-between; align-items: center; gap: 16px; font: 700 18px/1.3 var(--f-body); }
+.more summary::-webkit-details-marker { display: none; }
+.more summary .pm { font: 500 24px/1 var(--f-mono); color: var(--accent); }
+.more[open] summary .pm { transform: rotate(45deg); }
+.more .pm { transition: transform .2s ease; }
+.more-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 40px; padding: 0 32px 16px; }
+.mi { display: grid; grid-template-columns: 1fr auto; gap: 4px 20px; padding-block: 18px; border-top: 1px solid var(--line); }
+.mi > * { min-width: 0; }
+.mi .pr { font: 600 14px/1.5 var(--f-mono); white-space: nowrap; }
+.mi p { grid-column: 1 / -1; color: var(--muted); font-size: 15px; }
+
+/* Шаги */
+.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; counter-reset: s; position: relative; }
+.steps::before { content: ""; position: absolute; left: 0; right: 0; top: 22px; height: 2px; background: linear-gradient(90deg, var(--accent), var(--line)); }
+.steps li { counter-increment: s; position: relative; display: flex; flex-direction: column; gap: 10px; }
+.steps li::before { content: counter(s); width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; background: var(--bg); border: 2px solid var(--accent); color: var(--accent); font: 600 16px/1 var(--f-display); margin-bottom: 10px; }
+.steps .when { font: 600 12px/1 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.steps p { color: var(--muted); font-size: 16px; }
+
+/* Обо мне: тёмная карточка, фото вырезано и «выходит» из неё снизу */
+.about-card { background: var(--night); color: var(--night-ink); border-radius: 32px; position: relative; overflow: hidden;
+  display: grid; grid-template-columns: 1.15fr .85fr; gap: 24px; padding: 56px 0 0 56px; isolation: isolate; }
+.about-card > * { min-width: 0; }
+.about-card::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background-image: radial-gradient(circle at 1px 1px, var(--night-line) 1px, transparent 1.4px); background-size: 26px 26px;
+  mask-image: linear-gradient(90deg, transparent 30%, #000); -webkit-mask-image: linear-gradient(90deg, transparent 30%, #000); }
+.about-card::after { content: ""; position: absolute; z-index: -1; width: 640px; height: 640px; right: -140px; bottom: -220px; pointer-events: none;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 55%, transparent), transparent 75%); opacity: .7; }
+.about-copy { padding-bottom: 56px; display: flex; flex-direction: column; gap: 18px; }
+.about-copy blockquote { margin: 0; font: 600 clamp(22px, 2.6vw, 32px)/1.22 var(--f-display); letter-spacing: -.02em; max-width: 20em; }
+.who { display: flex; flex-direction: column; gap: 2px; padding-left: 16px; border-left: 2px solid var(--accent); margin-bottom: 8px; }
+.who span { font-size: 14px; color: var(--night-muted); }
+.about-copy p { color: var(--night-muted); max-width: 36em; }
+.diff { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 6px; }
+.diff div { background: var(--night-2); border: 1px solid var(--night-line); border-radius: 16px; padding: 18px 20px; font-size: 15px; color: var(--night-muted); }
+.diff b { display: block; font: 600 12px/1.4 var(--f-mono); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px; }
+.diff .them b { color: var(--night-muted); }
+.diff .me { border-color: color-mix(in srgb, var(--accent) 70%, var(--night-line)); color: var(--night-ink); }
+.diff .me b { color: color-mix(in srgb, var(--accent) 75%, #fff); }
+.portrait { margin: 0; align-self: end; position: relative; display: flex; justify-content: center; }
+/* Световой ореол: оба кольца с общим центром на лице (48% по ширине, 25% по высоте фото) */
+.ph { position: relative; width: 100%; max-width: 470px; margin-top: 16%; }
+.halo, .halo::after { position: absolute; left: 48.3%; top: 25%; border-radius: 50%; pointer-events: none; transform: translate(-50%, -50%); aspect-ratio: 1; }
+.halo { z-index: 0; width: 76%;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 46%, transparent), color-mix(in srgb, var(--accent) 16%, transparent) 58%, transparent 74%);
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--accent) 55%, transparent), 0 0 80px -6px color-mix(in srgb, var(--accent) 55%, transparent);
+  animation: halo 7s ease-in-out infinite; }
+.halo::after { content: ""; left: 50%; top: 50%; width: 128%; border: 1px solid color-mix(in srgb, var(--accent) 24%, transparent); }
+@keyframes halo { 0%, 100% { opacity: .85; } 50% { opacity: 1; } }
+.portrait img { display: block; width: 100%; max-width: 470px; height: auto; position: relative; z-index: 1;
+}
+.ghost { position: absolute; left: 50%; top: 4%; transform: translateX(-50%); font: 800 clamp(260px, 32vw, 420px)/1 var(--f-display);
+  color: transparent; -webkit-text-stroke: 2px var(--night-line); pointer-events: none; z-index: 0; }
+.badge { position: absolute; z-index: 2; left: 6%; bottom: 22%; display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 999px;
+  font: 600 13px/1 var(--f-body); color: var(--night-ink); background: color-mix(in srgb, var(--night) 70%, transparent);
+  border: 1px solid var(--night-line); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.badge .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gain); box-shadow: 0 0 0 4px color-mix(in srgb, var(--gain) 25%, transparent); }
+
+/* Кейсы */
+.cases { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.case { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 30px; display: flex; flex-direction: column; gap: 14px; }
+.case p { color: var(--muted); font-size: 16px; }
+.case .res { margin-top: auto; padding-top: 16px; border-top: 1px dashed var(--line); font: 500 14px/1.5 var(--f-mono); color: var(--ink); }
+
+.case-feature { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; padding: 40px; align-items: center;
+  background: var(--night); color: var(--night-ink); border-color: transparent; position: relative; overflow: hidden; isolation: isolate; }
+.case-feature::after { content: ""; position: absolute; z-index: -1; width: 520px; height: 520px; left: -180px; top: -240px; pointer-events: none;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 40%, transparent), transparent); opacity: .6; }
+.case-feature > * { min-width: 0; }
+.case-feature .tag { background: color-mix(in srgb, var(--accent) 22%, transparent); color: color-mix(in srgb, var(--accent) 70%, #fff); }
+.case-feature h3 { font: 600 clamp(22px, 2.4vw, 28px)/1.2 var(--f-display); letter-spacing: -.02em; }
+.cf-head { display: flex; flex-direction: column; gap: 16px; }
+.case-feature p { color: var(--night-muted); }
+.cf-pain { display: flex; flex-direction: column; gap: 12px; padding-left: 32px; border-left: 1px solid var(--night-line); font-size: 16px; }
+.cf-pain b { color: var(--night-ink); font-weight: 600; }
+.cf-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--night-line); border: 1px solid var(--night-line); border-radius: 18px; overflow: hidden; align-self: start; }
+.rf { background: var(--night-2); padding: 18px; display: flex; flex-direction: column; gap: 6px; }
+.rf b { font: 600 14px/1.3 var(--f-body); color: var(--night-ink); }
+.rf span { font-size: 13.5px; line-height: 1.45; color: var(--night-muted); }
+
+/* FAQ */
+.faq { display: flex; flex-direction: column; }
+.faq details { border-top: 1px solid var(--line); padding-block: 22px; }
+.faq details:last-child { border-bottom: 1px solid var(--line); }
+.faq summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; gap: 20px; font: 700 19px/1.35 var(--f-body); }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: "+"; flex: 0 0 auto; font: 500 24px/1 var(--f-mono); color: var(--accent); transition: transform .2s ease; }
+.faq details[open] summary::after { transform: rotate(45deg); }
+.faq details p { color: var(--muted); margin-top: 12px; max-width: 44em; }
+
+/* Финал */
+.final { padding-block: 0 96px; }
+.final-box { background: var(--night); color: var(--night-ink); border-radius: 32px; padding: clamp(32px, 6vw, 72px); position: relative; overflow: hidden;
+  display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; align-items: center; }
+.final-box::after { content: ""; position: absolute; width: 520px; height: 520px; left: -160px; bottom: -280px; background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 45%, transparent), transparent); opacity: .6; pointer-events: none; }
+.final-box > * { min-width: 0; position: relative; z-index: 1; }
+.final-box h2 { font-size: clamp(30px, 4.4vw, 50px); }
+.final-box p { color: var(--night-muted); margin-top: 16px; font-size: 18px; }
+.final-box .cta { display: flex; flex-direction: column; gap: 12px; }
+.contacts { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.contact { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border: 1px solid var(--night-line); border-radius: 14px; }
+.contact span { font: 500 15px/1.3 var(--f-mono); }
+.contact small { display: block; font: 500 11px/1 var(--f-mono); text-transform: uppercase; letter-spacing: .1em; color: var(--night-muted); margin-bottom: 6px; }
+.copy { font: 600 13px/1 var(--f-body); color: var(--night-ink); background: var(--night-2); border: 1px solid var(--night-line); border-radius: 999px; padding: 9px 14px; cursor: pointer; }
+.copy:hover { border-color: var(--night-muted); }
+
+/* Правовые документы */
+.legal { border-top: 1px solid var(--line); }
+.legal .wrap { padding-block: 24px; display: flex; flex-direction: column; gap: 8px; }
+.doc summary { cursor: pointer; font: 600 15px/1.4 var(--f-body); color: var(--muted); list-style: none; padding-block: 8px; }
+.doc summary::-webkit-details-marker { display: none; }
+.doc summary::after { content: " +"; color: var(--accent); }
+.doc[open] summary::after { content: " −"; }
+.doc-body { max-width: 760px; display: flex; flex-direction: column; gap: 10px; padding-bottom: 24px; font-size: 15px; color: var(--muted); }
+.doc-body h4 { margin: 10px 0 0; font: 700 15px/1.4 var(--f-body); color: var(--ink); }
+.doc-meta { font: 500 12px/1 var(--f-mono); letter-spacing: .06em; }
+footer { border-top: 1px solid var(--line); }
+.foot { display: grid; grid-template-columns: 1.1fr 1fr 1fr; gap: 40px; padding-block: 48px 56px; }
+.foot-col { display: flex; flex-direction: column; gap: 10px; min-width: 0; font-size: 15px; color: var(--muted); }
+.foot-col h4 { margin: 0 0 6px; font: 600 13px/1.3 var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink); }
+.foot-brand p { max-width: 26em; }
+.foot-col .mono { font-size: 14px; }
+.legal:not(:has(details[open])) { display: none; }
+footer a { color: var(--muted); text-decoration: none; }
+footer a:hover { color: var(--accent); }
+
+@media (max-width: 960px) {
+  .hero { grid-template-columns: 1fr; gap: 56px; padding-block: 40px 72px; }
+  .receipt-wrap { max-width: 400px; }
+  .facts-strip .wrap { grid-template-columns: repeat(2, 1fr); }
+  .fs:nth-child(3) { border-left: 0; padding-left: 0; }
+  .fs:nth-child(n+3) { border-top: 1px solid var(--night-line); }
+  .sec-head { grid-template-columns: 1fr; gap: 0; }
+  .leaks { grid-template-columns: 1fr; }
+  .cases { grid-template-columns: 1fr; }
+  .case-feature { grid-template-columns: 1fr; padding: 28px; }
+  .cf-pain { padding-left: 0; border-left: 0; padding-top: 18px; border-top: 1px solid var(--night-line); }
+  .svc-main { grid-template-columns: 1fr; }
+  .more-list { grid-template-columns: 1fr; }
+  .steps { grid-template-columns: repeat(2, 1fr); row-gap: 40px; }
+  .steps::before { display: none; }
+  .about-card { grid-template-columns: 1fr; padding: 32px 24px 0; gap: 0; }
+  .portrait { order: -1; max-width: 340px; justify-self: center; width: 100%; margin-bottom: -24px; }
+  .about-copy { padding-bottom: 32px; position: relative; z-index: 2; }
+  .final-box { grid-template-columns: 1fr; }
+  .foot { grid-template-columns: 1fr 1fr; }
+  .foot-brand { grid-column: 1 / -1; }
+  section.block { padding-block: 72px; }
+  .top nav { display: none; }
+}
+@media (max-width: 540px) {
+  body { font-size: 16px; }
+  /* ниши — одна строка с прокруткой */
+  .niches { flex-wrap: nowrap; overflow-x: auto; margin-inline: -20px; padding-inline: 20px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .niches::-webkit-scrollbar { display: none; }
+  .niches-label { display: none; }
+  .chip { flex: 0 0 auto; }
+  .hero { padding-block: 28px 56px; gap: 44px; }
+  .hero .lead { font-size: 17px; }
+  /* шаги — номер слева от текста */
+  .steps { gap: 22px; }
+  .steps li { display: grid; grid-template-columns: 40px 1fr; column-gap: 14px; row-gap: 4px; }
+  .steps li::before { grid-row: 1 / span 3; width: 40px; height: 40px; margin: 0; font-size: 14px; }
+  .steps li > * { grid-column: 2; }
+  section.block { padding-block: 56px; }
+  .sec-head { margin-bottom: 28px; }
+  .sec-head p { font-size: 16px; }
+  .fs { padding-block: 18px; }
+  .about-card { border-radius: 24px; }
+  .portrait { max-width: 300px; }
+  .final { padding-block: 0 64px; }
+  .final-box { border-radius: 24px; }
+  .brand span span { display: none; }
+  .brand b { font-size: 14px; }
+  .hero .cta .btn { width: 100%; }
+  .receipt { transform: none; padding: 20px 18px 30px; }
+  @keyframes print { from { clip-path: inset(0 0 100% 0); transform: translateY(-18px); } to { clip-path: inset(0 0 0 0); transform: none; } }
+  .steps { grid-template-columns: 1fr; }
+  .diff { grid-template-columns: 1fr; }
+  .foot { grid-template-columns: 1fr; gap: 28px; }
+  .cases { grid-template-columns: 1fr; }
+  .case-feature { padding: 24px; }
+  .svc-card, .leak, .case { padding: 24px; }
+  .more summary { padding: 20px 24px; }
+  .more-list { padding: 0 24px 12px; }
+  .fs b { font-size: 21px; }
+}
+</style>
+</head>
+<body>
+
+
+<div class="night">
+  <header class="top">
+    <div class="wrap">
+      <a class="brand" href="#top" aria-label="В начало">
+        <span class="mark">ПБ</span>
+        <span><b>ИИ для бизнеса</b><span>аудит потерь и автоматизация</span></span>
+      </a>
+      <nav aria-label="Разделы">
+        <a href="#leaks">Потери</a>
+        <a href="#services">Услуги</a>
+        <a href="#about">Обо мне</a>
+        <a href="#faq">Вопросы</a>
+      </nav>
+      <a class="btn btn-primary js-bot" href="#" target="_blank" rel="noopener">Расчёт потерь</a>
+    </div>
+  </header>
+
+  <div class="wrap hero" id="top">
+    <div>
+      <span class="eyebrow">Аудит и автоматизация · вся Россия</span>
+      <h1 id="hero-title">Ваш <span id="hero-noun">бизнес</span> <span class="hl">теряет деньги</span> каждый месяц. Найду где — и&nbsp;закрою эти дыры</h1>
+      <p class="lead" id="hero-lead">Поздние ответы на заявки, неявки, клиенты, которые тихо перестали приходить. Считаю потери в рублях и внедряю ИИ-инструменты, которые возвращают эти деньги.</p>
+
+      <div class="niches" role="group" aria-label="Ваша сфера">
+        <span class="niches-label">Ваша сфера</span>
+        <button class="chip" type="button" data-niche="all" id="n-all">Любой бизнес</button>
+        <button class="chip" type="button" data-niche="salon" id="n-salon">Салон красоты</button>
+        <button class="chip" type="button" data-niche="clinic" id="n-clinic">Клиника</button>
+        <button class="chip" type="button" data-niche="fitness" id="n-fitness">Фитнес-студия</button>
+        <button class="chip" type="button" data-niche="auto" id="n-auto">Автосервис</button>
+      </div>
+
+      <div class="cta">
+        <a class="btn btn-primary js-bot" href="#" target="_blank" rel="noopener">
+          Посчитать мои потери
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <a class="btn btn-line" href="#services">Услуги и цены</a>
+      </div>
+      <p class="note"><span>3 минуты</span><span>бесплатно</span><span>без доступа к CRM</span></p>
+    </div>
+
+    <div class="receipt-wrap">
+      <figure class="receipt" id="receipt" style="margin:0" aria-live="polite">
+        <div class="r-head"><b>РАСЧЁТ ПОТЕРЬ</b><span id="r-sub">пример: салон · чек 3 000 ₽</span></div>
+        <div class="r-top">
+          <div class="r-lose"><small>теряет в месяц</small><b id="r-total">−91 000 ₽</b></div>
+          <div class="r-win"><small>можно вернуть</small><b id="r-gain">+51 000 ₽</b><span id="r-pay">окупится за ~1 мес.</span></div>
+        </div>
+        <div id="r-rows" class="r-rows"></div>
+        <a class="r-cta js-bot" href="#" target="_blank" rel="noopener">Посчитать мой бизнес <span aria-hidden="true">→</span></a>
+        <p class="r-foot">бесплатно · 3 минуты · без доступа к CRM</p>
+      </figure>
+    </div>
+  </div>
+
+  <div class="facts-strip">
+    <div class="wrap">
+      <div class="fs"><b class="mono">3 мин</b><span>на расчёт потерь в рублях</span></div>
+      <div class="fs"><b class="mono">0 ₽</b><span>стоит экспресс-аудит</span></div>
+      <div class="fs"><b class="mono">2–4 нед.</b><span>от расчёта до работающих решений</span></div>
+      <div class="fs"><b class="mono">РФ</b><span>российские сервисы, данные остаются в стране</span></div>
+    </div>
+  </div>
+</div>
+
+<main>
+<section class="block" id="leaks">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Где утекают деньги</span>
+      <div>
+        <h2 id="leaks-title">Три места, где бизнес теряет больше всего</h2>
+        <p>2026 год ударил по малому бизнесу с двух сторон. НДС вырос до 22%, льготы по взносам отменили, ставка ЦБ держится на 14%. А спрос падает: почти 7 из 10 предпринимателей увидели снижение выручки, и лишь единицы смогли переложить рост затрат в цены. Почти половина бизнесов закончила 2025 год в минусе или в ноль.</p>
+        <p>Рентабельность тает, и каждый потерянный клиент теперь стоит дороже, чем год назад. Резать команду и рекламу — последнее дело. Сначала закройте утечки, которые есть почти у каждого бизнеса с записью.</p>
+      </div>
+    </div>
+    <div class="leaks" id="leaks-list"></div>
+  </div>
+</section>
+
+<section class="block" id="services">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Услуги и цены</span>
+      <div>
+        <h2>Начинаем с бесплатного расчёта, дальше — по шагам</h2>
+        <p>Сначала самое быстрое и окупаемое. Точную стоимость фиксируем до начала работ.</p>
+        <div class="pay-note"><span>Работаю с ООО, ИП и физическими лицами</span><span>Договор и оплата по счёту</span><span>Закрывающие документы</span></div>
+      </div>
+    </div>
+
+    <div class="svc-main">
+      <article class="svc-card free">
+        <span class="tag">С этого начинают</span>
+        <h3 style="font:600 24px/1.2 var(--f-display)">Экспресс-аудит «где бизнес теряет деньги»</h3>
+        <div class="price"><b>0 ₽</b></div>
+        <p>12 вопросов о заявках, записях и клиентах — и сразу расчёт.</p>
+        <ul>
+          <li>сумма потерь в рублях в месяц</li>
+          <li>три главные точки утечки</li>
+          <li>что исправить первым и сколько это стоит</li>
+        </ul>
+        <a class="btn js-bot" href="#" target="_blank" rel="noopener">Пройти расчёт</a>
+      </article>
+      <article class="svc-card">
+        <span class="tag">Заявки</span>
+        <h3>ИИ-администратор</h3>
+        <div class="price">от <b>25 000 ₽</b></div>
+        <p>Отвечает клиентам 24/7 в Telegram, VK и на сайте, консультирует по ценам, записывает и передаёт горячие заявки вам.</p>
+        <ul><li>ни одной заявки без ответа ночью</li><li>минус рутина у администратора</li></ul>
+      </article>
+      <article class="svc-card">
+        <span class="tag">Повторные продажи</span>
+        <h3>Возврат «спящих» клиентов</h3>
+        <div class="price">от <b>10 000 ₽</b></div>
+        <p>Персональные сообщения тем, кто давно не приходил: с любимым мастером, услугой и записью в один клик.</p>
+        <ul><li>деньги из базы, которая уже есть</li><li>дешевле любой рекламы</li></ul>
+      </article>
+    </div>
+
+    <details class="more">
+      <summary>Ещё услуги <span class="pm" aria-hidden="true">+</span></summary>
+      <div class="more-list">
+        <div class="mi"><h3>Полный аудит с планом</h3><span class="pr">8 000 ₽</span><p>Проверка бизнеса глазами клиента, разбор цифр, отчёт с планом внедрения. Стоимость засчитывается во внедрение.</p></div>
+        <div class="mi"><h3>Напоминания и перезапись</h3><span class="pr">от 5 000 ₽</span><p>Напоминания о записи и продлении, перенос вместо неявки.</p></div>
+        <div class="mi"><h3>Аудит звонков</h3><span class="pr">от 5 000 ₽</span><p>ИИ разбирает звонки по чек-листу, показывает ошибки администраторов и недожатых клиентов.</p></div>
+        <div class="mi"><h3>Ответы на отзывы</h3><span class="pr">от 3 000 ₽/мес</span><p>Яндекс Карты и 2ГИС: ответы на все отзывы и отчёт о жалобах.</p></div>
+        <div class="mi"><h3>Внедрение ИИ для команды</h3><span class="pr">от 10 000 ₽</span><p>База знаний для сотрудников, контент, работа с документами, обучение.</p></div>
+        <div class="mi"><h3>Telegram Mini App</h3><span class="pr">от 30 000 ₽</span><p>Запись, каталог, личный кабинет и лояльность прямо в мессенджере.</p></div>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section class="block" id="process">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Как работаю</span>
+      <div><h2>От расчёта до результата — 2–4 недели</h2></div>
+    </div>
+    <ol class="steps">
+      <li><span class="when">День 1</span><h3>Расчёт потерь</h3><p>Бесплатно: видите сумму потерь и три главные точки.</p></li>
+      <li><span class="when">День 2–3</span><h3>План и цена</h3><p>Выбираем 1–3 задачи с самым быстрым эффектом, фиксируем сроки и стоимость.</p></li>
+      <li><span class="when">Неделя 1–3</span><h3>Внедрение</h3><p>Запускаю решения по одному, обучаю сотрудников, оставляю инструкции.</p></li>
+      <li><span class="when">Через 30 дней</span><h3>Отчёт о результате</h3><p>Сколько заявок обработано, неявок предотвращено, клиентов вернулось.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section class="block" id="about">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Обо мне</span>
+      <div><h2>Я из реального бизнеса, а не из IT</h2></div>
+    </div>
+    <div class="about-card">
+      <div class="about-copy">
+        <blockquote>Я сам бился за каждый процент конверсии. Поэтому знаю, где именно теряются клиенты — и как их вернуть.</blockquote>
+        <div class="who"><b>Павел Барков</b><span>предприниматель, владелец сети фитнес-студий и бизнеса по аутсорсингу персонала</span></div>
+        <p>У меня сеть фитнес-студий и бизнес по аутсорсингу персонала — оба в реальном секторе. Я каждый день отвечаю за выручку, продажи, маркетинг и команду и прохожу через то же, что и вы: рост налогов, дорогой персонал, падающий спрос.</p>
+        <p>Я прошёл каждый этап воронки сам: от первой заявки до повторной покупки. Знаю, на каком шаге уходят клиенты и какие решения реально поднимают конверсию, а какие только красиво выглядят в презентации.</p>
+        <div class="diff">
+          <div class="them"><b>Обычный подрядчик</b>Продаёт технологию: «внедрим нейросеть», «настроим бота».</div>
+          <div class="me"><b>Мой подход</b>Считаю деньги: сколько вы теряете, что вернётся и за какой срок.</div>
+        </div>
+      </div>
+      <figure class="portrait">
+        <div class="ph"><span class="halo" aria-hidden="true"></span><img src="pavel.webp" alt="Павел Барков" width="705" height="997" decoding="async"></div>
+        <figcaption class="badge"><span class="dot"></span>на связи в Telegram</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="cases">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Что уже работает</span>
+      <div>
+        <h2>Инструменты, которые я построил для своих бизнесов</h2>
+        <p>Сначала проверяю всё на себе. Кейсы клиентов с цифрами добавляю по мере запуска.</p>
+      </div>
+    </div>
+    <div class="cases">
+      <article class="case case-feature">
+        <div class="cf-head">
+          <span class="tag">amoCRM + Telegram</span>
+          <h3>ИИ-РОП — руководитель отдела продаж в Telegram</h3>
+          <p>Каждый день следит за amoCRM, ставит задачи менеджерам, проверяет выполнение и показывает руководителю, где теряются продажи.</p>
+        </div>
+          <div class="cf-pain">
+            <p>Заявки копятся в «Неразобранном», клиенту перезванивают через полдня, после пробного про него забывают, продления висят неделями. А в отчёте менеджера «всё хорошо».</p>
+            <p><b>Хороший РОП стоит дорого и не может смотреть в CRM круглые сутки. ИИ-РОП смотрит постоянно и сразу сообщает, где что-то пошло не так.</b></p>
+          </div>
+      </article>
+      <article class="case">
+        <span class="tag">Аналитика</span>
+        <h3>Панель владельца</h3>
+        <p>Выручка, загрузка и клиенты в одном экране — без таблиц и ежедневных созвонов с управляющими.</p>
+        <p class="res">→ решения на цифрах, а не на ощущениях</p>
+      </article>
+      <article class="case">
+        <span class="tag">Управление</span>
+        <h3>ИИ-помощник для задач</h3>
+        <p>Пишешь задачу в Telegram своими словами — ИИ разбирает её и раскладывает по общему списку команды.</p>
+        <p class="res">→ ничего не теряется в переписках</p>
+      </article>
+      <article class="case">
+        <span class="tag">Маркетинг</span>
+        <h3>Стоимость клиента по каналам</h3>
+        <p>Бот спрашивает, сколько потрачено на каждый рекламный канал, и показывает, сколько заявок дал каждый и во сколько обошёлся каждый клиент.</p>
+        <p class="res">→ видно, какие каналы работают, а какие проедают бюджет</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="faq">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Частые вопросы</span>
+      <div><h2>Что обычно спрашивают владельцы</h2></div>
+    </div>
+    <div class="faq">
+      <details><summary>Работаете с компаниями? Как оплатить?</summary><p>Да, работаю и с компаниями (ООО, ИП), и с физическими лицами. Для компаний — договор, оплата по счёту с расчётного счёта и закрывающие документы, чтобы расходы можно было учесть в бухгалтерии.</p></details>
+      <details><summary>Нужно давать доступ к CRM и базе клиентов?</summary><p>Для расчёта и аудита — нет. Хватит ваших ответов и внешней проверки. Доступ нужен только при внедрении, по договору.</p></details>
+      <details><summary>Где хранятся данные моих клиентов?</summary><p>Работаю на российских сервисах, данные остаются в РФ. Рассылки уходят только клиентам с согласием и с кнопкой отписки.</p></details>
+      <details><summary>Сколько это стоит и когда окупится?</summary><p>Отдельные решения — от 5 000 ₽, комплекс для первой линии — 40–80 тыс. ₽. Срок окупаемости считаем заранее, на этапе аудита, по вашим цифрам.</p></details>
+      <details><summary>ИИ не будет отвечать клиентам глупости?</summary><p>Он отвечает только по вашим ценам, услугам и правилам. Сложные и спорные вопросы сразу передаёт вам или администратору.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="final">
+  <div class="wrap">
+    <div class="final-box">
+      <div>
+        <span class="eyebrow" style="color:color-mix(in srgb, var(--accent) 70%, #fff)">Бесплатно · 3 минуты</span>
+        <h2 style="margin-top:16px">Узнайте, сколько теряет ваш бизнес</h2>
+        <p>Без доступа к вашим данным. Результат — сразу.</p>
+      </div>
+      <div class="cta">
+        <a class="btn btn-primary js-bot" href="#" target="_blank" rel="noopener">Посчитать потери</a>
+        <div class="contacts">
+          <div class="contact">
+            <div><small>Telegram</small><span class="js-tg-text">@barkov_pv</span></div>
+            <a class="copy js-tg" href="#" target="_blank" rel="noopener" style="text-decoration:none">Написать</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<section class="legal" aria-label="Правовая информация">
+  <div class="wrap">
+    <details id="privacy" class="doc">
+      <summary>Политика обработки персональных данных</summary>
+      <div class="doc-body">
+        <p class="doc-meta">Редакция от 24 октября 2026 г.</p>
+        <h4>1. Кто обрабатывает данные</h4>
+        <p>Оператор персональных данных — ИП Барков Павел Валерьевич, ИНН 410125881376, ОГРНИП 318410100012910, e-mail: pbwork41@gmail.com, Telegram: @barkov_pv (далее — Оператор). Политика составлена в соответствии с Федеральным законом от 27.07.2006 № 152-ФЗ «О персональных данных» и действует в отношении данных, которые Оператор получает через этот сайт и Telegram-бот @audit_bz_bot (далее — бот).</p>
+        <h4>2. Какие данные обрабатываются</h4>
+        <p>Через бот: имя и фамилия, указанные в профиле Telegram; имя пользователя (ник) и идентификатор Telegram; номер телефона, если пользователь его оставил; ответы на вопросы о бизнесе (сфера, количество заявок и визитов, средний чек и другие показатели); дата и время согласия. Через сайт: сайт не содержит форм и не собирает персональные данные. Сайт не использует cookie для аналитики и рекламы.</p>
+        <h4>3. Зачем</h4>
+        <p>Расчёт ориентировочных потерь бизнеса и отправка результата пользователю; связь с пользователем для обсуждения результата, проведения аудита и оказания услуг; заключение и исполнение договора, если пользователь становится клиентом.</p>
+        <h4>4. На каком основании</h4>
+        <p>Согласие пользователя на обработку персональных данных, которое он даёт в боте нажатием кнопки «Согласен» до начала расчёта, а также заключение и исполнение договора с пользователем.</p>
+        <h4>5. Что Оператор делает с данными</h4>
+        <p>Сбор, запись, систематизация, хранение, уточнение, использование и удаление — с использованием средств автоматизации. Персональные данные граждан РФ записываются и хранятся в базах данных, находящихся на территории Российской Федерации.</p>
+        <h4>6. Кому передаются</h4>
+        <p>Данные не продаются и не передаются третьим лицам для их собственных целей. Для работы бота используется мессенджер Telegram и сервис автоматизации, на котором работает бот. Для формирования текста отчёта сторонней ИИ-модели передаются только обезличенные цифры расчёта, без имени, ника и телефона.</p>
+        <h4>7. Сколько хранятся</h4>
+        <p>До достижения целей обработки, но не дольше 3 лет с момента последнего обращения пользователя, либо до отзыва согласия. После этого данные удаляются в течение 30 дней.</p>
+        <h4>8. Права пользователя</h4>
+        <p>Пользователь вправе узнать, какие его данные обрабатываются, потребовать их уточнения, блокирования или удаления и отозвать согласие. Отозвать согласие можно командой /stop в боте или сообщением Оператору в Telegram @barkov_pv либо на e-mail pbwork41@gmail.com. Оператор отвечает на запросы в течение 10 рабочих дней.</p>
+        <h4>9. Как защищены данные</h4>
+        <p>Доступ к данным есть только у Оператора. Оператор применяет организационные и технические меры защиты, предусмотренные законодательством РФ, и уведомляет Роскомнадзор об обработке персональных данных.</p>
+      </div>
+    </details>
+    <details id="consent" class="doc">
+      <summary>Согласие на обработку персональных данных</summary>
+      <div class="doc-body">
+        <p class="doc-meta">Редакция от 24 октября 2026 г.</p>
+        <p>Нажимая в Telegram-боте @audit_bz_bot кнопку «Согласен, начать расчёт», я свободно, своей волей и в своём интересе даю согласие ИП Барков Павел Валерьевич, ИНН 410125881376, ОГРНИП 318410100012910, e-mail: pbwork41@gmail.com, Telegram: @barkov_pv на обработку моих персональных данных: имя и фамилия из профиля Telegram, имя пользователя и идентификатор Telegram, номер телефона (если я его укажу), мои ответы на вопросы о бизнесе.</p>
+        <p>Цели обработки: расчёт ориентировочных потерь бизнеса и отправка мне результата; связь со мной для обсуждения результата, аудита и услуг.</p>
+        <p>Действия с данными: сбор, запись, систематизация, хранение, уточнение, использование, удаление — с использованием средств автоматизации.</p>
+        <p>Согласие действует 3 года с момента его предоставления или до его отзыва. Я могу отозвать согласие командой /stop в боте или сообщением Оператору в Telegram @barkov_pv. Условия обработки описаны в <a href="#privacy" class="js-open-privacy">политике обработки персональных данных</a>.</p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot">
+    <div class="foot-col foot-brand">
+      <p>Аудит потерь и ИИ-автоматизация для малого бизнеса. Работаю удалённо по всей России.</p>
+    </div>
+    <div class="foot-col">
+      <h4>Правовые документы</h4>
+      <a href="#privacy" class="js-open-privacy">Политика обработки персональных данных</a>
+      <a href="#consent" class="js-open-consent">Согласие на обработку персональных данных</a>
+    </div>
+    <div class="foot-col">
+      <h4>Реквизиты</h4>
+      <span>ИП Барков Павел Валерьевич</span>
+      <span class="mono">ИНН 410125881376</span>
+      <span class="mono">ОГРНИП 318410100012910</span>
+      <span class="mono">+7 984 167-77-79</span>
+      <span>pbwork41@gmail.com</span>
+      <a class="js-tg" href="#" target="_blank" rel="noopener">Telegram: <span class="js-tg-text">@barkov_pv</span></a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // ===== Настройки — меняйте здесь =====
+  const BOT_USERNAME = "audit_bz_bot";        // имя бота-аудита без @
+  const TG_USERNAME = "barkov_pv";       // ваш Telegram без @
+
+  // Примеры расчёта — по тем же формулам, что в боте
+  const N = {
+    all: { noun: "бизнес", sub: "пример: салон · чек 3 000 ₽", chip: "салон",
+      rows: [["Поздние ответы", 32000, "26 заявок без быстрого ответа → ≈11 потерянных визитов × 3 000 ₽"], ["Ушедшие клиенты", 27000, "227 клиентов давно не были, вернуть ≈9 в месяц × 3 000 ₽"], ["Неявки", 24000, "16 неявок × 3 000 ₽, половину окон уже не заполнить"], ["Отзывы на картах", 8000, "≈3 визита в месяц уходят к конкурентам с рейтингом выше"]], gain: 51000, pay: "примерно 1 месяц",
+      leads: "Три места, где бизнес теряет больше всего",
+      leaks: [["15+ минут", "ожидания ответа", "Поздние ответы на заявки", "Ответ позже 15 минут резко режет конверсию в запись. Клиент, который написал вечером, к утру уже у конкурента."],
+              ["8–15% записей", "в сфере услуг", "Неявки и непродления", "Клиент записался и не пришёл, абонемент закончился и не продлён. Бизнес теряет деньги на пустых часах."],
+              ["треть базы", "молчит годами", "Ушедшие клиенты", "Сотни людей когда-то приходили и перестали. Им никто не пишет, хотя вернуть старого клиента дешевле, чем найти нового."]] },
+    salon: { noun: "салон", sub: "пример: салон · чек 3 000 ₽",
+      rows: [["Поздние ответы", 32000, "26 заявок без быстрого ответа → ≈11 потерянных визитов × 3 000 ₽"], ["Ушедшие клиенты", 27000, "227 клиентов давно не были, вернуть ≈9 в месяц × 3 000 ₽"], ["Неявки", 24000, "16 неявок × 3 000 ₽, половину окон уже не заполнить"], ["Отзывы на картах", 8000, "≈3 визита в месяц уходят к конкурентам с рейтингом выше"]], gain: 51000, pay: "примерно 1 месяц",
+      leads: "Три места, где салон теряет больше всего",
+      leaks: [["15+ минут", "ожидания ответа", "Поздние ответы в мессенджерах", "Ответ позже 15 минут резко режет конверсию в запись. Клиентка, написавшая в 22:00, к утру уже записалась в салон напротив."],
+              ["около 8%", "записей — неявки", "Пустые окна у мастеров", "Записалась и не пришла: мастер простаивает, а заполнить окно в последний момент некем."],
+              ["треть базы", "не была 60+ дней", "Клиентки, которые ушли", "Им никто не напомнил о себе. Персональное сообщение от любимого мастера возвращает часть из них."]] },
+    clinic: { noun: "клиника", sub: "пример: клиника · чек 4 000 ₽",
+      rows: [["Ушедшие пациенты", 70000, "700 пациентов давно не были, вернуть ≈18 в месяц × 4 000 ₽"], ["Неявки на приём", 40000, "20 неявок × 4 000 ₽, половину окон уже не заполнить"], ["Пропущенные звонки", 29000, "18 обращений без быстрого ответа → ≈7 потерянных приёмов × 4 000 ₽"], ["Отзывы на картах", 11000, "≈3 приёма в месяц уходят к конкурентам с рейтингом выше"]], gain: 82000, pay: "меньше чем за месяц",
+      leads: "Три места, где клиника теряет больше всего",
+      leaks: [["около 10%", "приёмов — неявки", "Неявки на приём", "Пациент забыл о записи, врач простаивает. Напоминание и подтверждение за сутки закрывают большую часть таких окон."],
+              ["пропущенный звонок", "= ушедший пациент", "Регистратура не успевает", "Пока администратор с пациентом у стойки, звонки уходят в никуда. Пациент звонит в следующую клинику."],
+              ["повторный приём", "никто не напомнил", "Пациенты, которые не вернулись", "Контроль, профосмотр, следующий этап лечения — без напоминания пациент просто не приходит."]] },
+    fitness: { noun: "студия", sub: "пример: студия · абонемент 6 000 ₽",
+      rows: [["Непродления абонементов", 68000, "продлевают 70% вместо 85% → ≈11 абонементов × 6 000 ₽"], ["Ушедшие клиенты", 34000, "227 бывших клиентов, вернуть ≈6 в месяц × 6 000 ₽"], ["Поздние ответы", 29000, "12 заявок без быстрого ответа → ≈5 абонементов × 6 000 ₽"]], gain: 81000, pay: "меньше чем за месяц",
+      leads: "Три места, где студия теряет больше всего",
+      leaks: [["≈ 23 клиента", "в месяц не продлевают", "Непродления абонементов", "Абонемент закончился — и всё. Никто не написал за неделю до окончания и не предложил продление."],
+              ["пробное занятие", "без продолжения", "Заявки, которые не дожали", "Человек пришёл на пробное и пропал. Без быстрого касания после тренировки он не покупает абонемент."],
+              ["треть базы", "когда-то ходила", "Бывшие клиенты", "Ушли на лето, переехали, потеряли мотивацию. Персональное приглашение возвращает часть из них."]] },
+    auto: { noun: "автосервис", sub: "пример: автосервис · чек 6 000 ₽",
+      rows: [["Клиенты не вернулись на ТО", 55000, "227 клиентов давно не были, вернуть ≈9 в месяц × 6 000 ₽"], ["Пропущенные заявки", 24000, "10 заявок без быстрого ответа → ≈4 заказа × 6 000 ₽"], ["Нет карточки на картах", 11000, "≈2 заказа в месяц не доходят из поиска на картах"], ["Неявки", 10000, "3–4 неявки × 6 000 ₽, половину окон уже не заполнить"]], gain: 55000, pay: "примерно 1 месяц",
+      leads: "Три места, где автосервис теряет больше всего",
+      leaks: [["ТО раз в полгода", "но никто не напомнил", "Клиенты, которые не вернулись", "Человек один раз сделал ремонт и забыл про вас. Напоминание о плановом ТО возвращает его в бокс."],
+              ["звонок во время работы", "некому взять трубку", "Пропущенные заявки", "Мастер под машиной, администратора нет. Клиент звонит в следующий сервис из поиска."],
+              ["нет на картах", "или рейтинг ниже 4,5", "Невидимость в поиске", "Новые клиенты выбирают сервис на картах. Без карточки и ответов на отзывы вас просто не находят."]] },
+  };
+
+  const fmt = n => n.toLocaleString("ru-RU").replace(/ /g, " ") + " ₽";
+  const $ = id => document.getElementById(id);
+
+  function render(key, animate) {
+    const d = N[key] || N.all;
+    $("hero-noun").textContent = d.noun;
+    $("r-sub").textContent = d.sub;
+    const total = d.rows.reduce((s, r) => s + r[1], 0);
+    const max = Math.max(...d.rows.map(r => r[1]));
+    const short = h => h.split(" → ")[0].split(", ")[0];
+    $("r-total").textContent = "−" + fmt(total);
+    $("r-gain").textContent = "+" + fmt(d.gain);
+    $("r-pay").textContent = "окупится " + d.pay.replace("примерно 1 месяц", "за ~1 мес.").replace("меньше чем за месяц", "быстрее месяца");
+    $("r-rows").innerHTML = d.rows.map(([k, v, h]) =>
+      `<div class="r-row"><span class="k">${k}</span><span class="v">−${fmt(v)}</span><span class="bar"><i style="width:${Math.round(v / max * 100)}%"></i></span><span class="h" title="${h}">${short(h)}</span></div>`).join("");
+    $("leaks-title").textContent = d.leads;
+    $("leaks-list").innerHTML = d.leaks.map(([fig, small, h, p]) =>
+      `<article class="leak"><span class="fig">${fig}<small>${small}</small></span><h3>${h}</h3><p>${p}</p></article>`).join("");
+    document.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", c.dataset.niche === key ? "true" : "false"));
+    if (animate) {
+      const r = $("receipt");
+      r.classList.remove("printing"); void r.offsetWidth; r.classList.add("printing");
+    }
+  }
+
+  // Ссылки
+  document.querySelectorAll(".js-bot").forEach(a => a.href = "https://t.me/" + BOT_USERNAME + "?start=site");
+  document.querySelectorAll(".js-tg").forEach(a => a.href = "https://t.me/" + TG_USERNAME);
+  document.querySelectorAll(".js-tg-text").forEach(el => el.textContent = "@" + TG_USERNAME);
+
+  // Ниша: из ссылки (#salon, #clinic, #fitness, #auto) или по клику
+  const fromHash = location.hash.replace("#", "");
+  render(N[fromHash] ? fromHash : "all", false);
+  document.querySelectorAll(".chip").forEach(c => c.addEventListener("click", () => render(c.dataset.niche, true)));
+
+
+
+  // Правовые документы: открываются по ссылке #privacy / #consent
+  function openDoc(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.open = true;
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  if (location.hash === "#privacy" || location.hash === "#consent") openDoc(location.hash.slice(1));
+  document.querySelectorAll(".js-open-privacy, .js-open-consent").forEach(a => a.addEventListener("click", e => {
+    e.preventDefault(); openDoc(a.classList.contains("js-open-privacy") ? "privacy" : "consent");
+  }));
+</script>
+
+</body>
+</html>
